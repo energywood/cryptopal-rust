@@ -1,3 +1,4 @@
+extern crate hex;
 
 use std::env;
 use std::fs;
@@ -12,5 +13,13 @@ fn main() {
     let contents = fs::read_to_string(filename)
         .expect("Something went wrong reading the file");
 
-    println!("With text:\n{}", contents);
+    let lines = contents.lines();
+
+    for (i, line) in lines.enumerate() {
+        if i == 100 {
+            let result = hex::decode(line).unwrap();
+            let text = String::from_utf8(result).unwrap();
+        }
+        println!("line:{} {}", i, line);
+    }
 }

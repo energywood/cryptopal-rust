@@ -1,9 +1,8 @@
-[package]
-name = "cryptopal"
-version = "0.1.0"
-authors = ["gzhong"]
 
-[dependencies]
-hex="0.3.2"
-rand = "0.3.14"
-base64 = "0.10.1"
+
+[workspace]
+
+members = [
+    "set1lib",
+    "set1c4"
+]

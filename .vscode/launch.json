@@ -7,16 +7,17 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'cryptopal'",
+            "name": "Debug unit tests in library 'set1lib'",
             "cargo": {
                 "args": [
-                    "build",
-                    "--bin=cryptopal",
-                    "--package=cryptopal"
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=set1lib"
                 ],
                 "filter": {
-                    "name": "cryptopal",
-                    "kind": "bin"
+                    "name": "set1lib",
+                    "kind": "lib"
                 }
             },
             "args": [],
@@ -25,16 +26,34 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'cryptopal'",
+            "name": "Debug executable 'set1c4'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=set1c4",
+                    "--package=set1c4"
+                ],
+                "filter": {
+                    "name": "set1c4",
+                    "kind": "bin"
+                }
+            },
+            "args": ["set1c4/4.txt"],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'set1c4'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=cryptopal",
-                    "--package=cryptopal"
+                    "--bin=set1c4",
+                    "--package=set1c4"
                 ],
                 "filter": {
-                    "name": "cryptopal",
+                    "name": "set1c4",
                     "kind": "bin"
                 }
             },

@@ -4,4 +4,5 @@ version = "0.1.0"
 authors = ["gzhong <gzhong.git@outlook.com>"]
 
 [dependencies]
+hex="0.3.2"
 set1lib = { path = "../set1lib" }
