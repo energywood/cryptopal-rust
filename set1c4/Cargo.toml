@@ -1,0 +1,7 @@
+[package]
+name = "set1c4"
+version = "0.1.0"
+authors = ["gzhong <gzhong.git@outlook.com>"]
+
+[dependencies]
+set1lib = { path = "../set1lib" }
