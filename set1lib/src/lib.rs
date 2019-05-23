@@ -21,15 +21,18 @@ fn fixed_xor(hex_left: &str, hex_right: &str) -> String {
 }
 
 #[allow(dead_code)]
-fn xor_decode(hex_left: &str, key: u8) -> String {
+fn xor_decode(hex_left: &str, key: u8) -> Option<String> {
     let left_bin = hex::decode(hex_left).unwrap();
     let mut result: Vec<u8> = Vec::new();
     // let key_u8 = key as u8;
     for num in 0..left_bin.len() {
         result.push(left_bin[num]^key);
     }
-    let plaintext = std::str::from_utf8(&result).unwrap();
-    return String::from(plaintext);
+    let plaintext_opt = std::str::from_utf8(&result).ok();
+    match plaintext_opt {
+        Some(plaintext) => return Some(String::from(plaintext)),
+        None => return None
+    }
 }
 
 #[allow(dead_code)]
@@ -44,20 +47,25 @@ fn get_score(message: &str) -> i32 {
 }
 
 #[allow(dead_code)]
-fn crack_xor(message: &str) -> String {
-    let start = 'A' as u8;
+pub fn crack_xor(message: &str) -> (i32, String) {
+    let start = '0' as u8;
     let end = 'z' as u8;
     let mut max = 0;
     let mut result = String::new();
     for key in start..end {
         let curr = xor_decode(message, key);
-        let s = get_score(&curr);
+        if curr == None {
+            continue;
+        }
+        let curr_msg = curr.unwrap();
+        let s = get_score(&curr_msg);
         if s > max {
             max = s;
-            result = curr;
+            result = curr_msg;
+            // println!("debug {} {}", max, result);
         }
     }
-    return result;
+    return (max, result);
 }
 
 
@@ -82,7 +90,7 @@ mod tests {
     #[test]
     fn test_crack_xor() {
         let message = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
-        let plaintext = crack_xor(message);
+        let plaintext = crack_xor(message).1;
         assert_eq!(plaintext, "Cooking MC's like a pound of bacon");
     }
 }

@@ -1,7 +1,8 @@
 extern crate hex;
-
+extern crate set1lib;
 use std::env;
 use std::fs;
+
 
 fn main() {
 
@@ -15,11 +16,17 @@ fn main() {
 
     let lines = contents.lines();
 
+    let mut line_num = 0;
+    let mut max = 0;
+    let mut result = String::new();
     for (i, line) in lines.enumerate() {
-        if i == 100 {
-            let result = hex::decode(line).unwrap();
-            let text = String::from_utf8(result).unwrap();
+        let (score, text) = set1lib::crack_xor(line);
+        // println!("line:{} {}", i, text);
+        if score > max {
+            max = score;
+            result = text;
+            line_num = i;
         }
-        println!("line:{} {}", i, line);
     }
+    println!("result: {} {} {}", line_num, max, result);
 }
