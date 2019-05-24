@@ -46,7 +46,7 @@ fn get_score(message: &str) -> i32 {
     return score;
 }
 
-#[allow(dead_code)]
+
 pub fn crack_xor(message: &str) -> (i32, String) {
     let start = '0' as u8;
     let end = 'z' as u8;
@@ -66,6 +66,20 @@ pub fn crack_xor(message: &str) -> (i32, String) {
         }
     }
     return (max, result);
+}
+
+
+pub fn repeating_key_xor(key:&str, message:&str) -> String {
+    let key_bytes = key.as_bytes();
+    let key_len = key_bytes.len();
+    let message_bytes = message.as_bytes();
+    let mut plaintext_bytes:Vec<u8> = Vec::new();
+    for (i, data) in message_bytes.iter().enumerate() {
+        let k = i % key_len;
+        plaintext_bytes.push(data^key_bytes[k]);
+    }
+    let result = hex::encode(plaintext_bytes);
+    return result;
 }
 
 
@@ -92,5 +106,13 @@ mod tests {
         let message = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
         let plaintext = crack_xor(message).1;
         assert_eq!(plaintext, "Cooking MC's like a pound of bacon");
+    }
+
+    #[test]
+    fn test_repeating_key_xor() {
+        let key = "ICE";
+        let message1 = "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal";
+        let result = repeating_key_xor(key, message1);
+        assert_eq!(result, "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f");
     }
 }
