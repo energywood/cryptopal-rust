@@ -51,6 +51,20 @@ fn get_score(message: &str) -> i32 {
     score
 }
 
+fn get_score_v2(message:&str) -> i32 {
+    let mut frequency = get_frequency(message.len());
+    for &data in message.to_ascii_lowercase().as_bytes() {
+        let idx = (data as i32) - ('a' as i32);
+        if idx >= 0 && idx <= 26 {
+            let idx = idx as usize;
+            frequency[idx] = frequency[idx] - 1;
+        }
+    }
+
+    // frequency.iter().map()
+    0
+}
+
 
 pub fn crack_xor(message: &str) -> (i32, String) {
     let start = '0' as u8;
@@ -102,9 +116,9 @@ pub fn hamming_distance(left:&[u8], right:&[u8]) -> u32 {
     distance
 }
 
-pub fn get_frequency(size:u32) -> Vec<i32> {
-    let result: Vec<i32> = Vec::new();
-    result
+pub fn get_frequency(size:usize) -> Vec<i32> {
+    let frequency:Vec<i32> = FREQUENCY.iter().map(|x| (x / 100.0 * size as f64) as i32).collect();
+    frequency
 }
 
 
