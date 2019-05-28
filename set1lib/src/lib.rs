@@ -1,12 +1,17 @@
 extern crate hex;
 extern crate base64;
 
+const FREQUENCY:[f64;26] = [8.167, 1.492, 2.782, 4.253, 12.702, 2.228, 2.015, 
+                            6.094, 6.966, 0.153, 0.772, 4.025, 2.406, 6.749,
+                            7.507, 1.929, 0.095, 5.987, 6.327, 9.056,
+                            2.758, 0.978, 2.360, 0.150, 1.974, 0.074]; 
+
 #[allow(dead_code)]
 fn hex_to_base64(hexstring : &str) -> String {
     let result = hex::decode(hexstring);
     let bin = result.unwrap();
     let base64 = base64::encode(&bin);
-    return base64;
+    base64
 }
 
 #[allow(dead_code)]
@@ -17,7 +22,7 @@ fn fixed_xor(hex_left: &str, hex_right: &str) -> String {
     for num in 0..left_bin.len() {
         result.push(left_bin[num]^right_bin[num]);
     }
-    return hex::encode(result);
+    hex::encode(result)
 }
 
 #[allow(dead_code)]
@@ -43,7 +48,7 @@ fn get_score(message: &str) -> i32 {
         total = total * word.len();
     }
     let score:i32 = (total) as i32;
-    return score;
+    score
 }
 
 
@@ -65,7 +70,7 @@ pub fn crack_xor(message: &str) -> (i32, String) {
             // println!("debug {} {}", max, result);
         }
     }
-    return (max, result);
+    (max, result)
 }
 
 
@@ -79,15 +84,13 @@ pub fn repeating_key_xor(key:&str, message:&str) -> String {
         plaintext_bytes.push(data^key_bytes[k]);
     }
     let result = hex::encode(plaintext_bytes);
-    return result;
+    result
 }
 
-pub fn hamming_distance(left:&str, right:&str) -> u32 {
-    let left_bytes = left.as_bytes();
-    let right_bytes = right.as_bytes();
+pub fn hamming_distance(left:&[u8], right:&[u8]) -> u32 {
     let mut distance:u32 = 0;
-    for (i, data) in left_bytes.iter().enumerate() {
-        let mut result:u8 = data^right_bytes[i];
+    for (i, data) in left.iter().enumerate() {
+        let mut result:u8 = data^right[i];
         while result > 0 {
             let d = result&1;
             if d == 1  {
@@ -96,7 +99,12 @@ pub fn hamming_distance(left:&str, right:&str) -> u32 {
             result = result >> 1;
         }
     }
-    return distance;
+    distance
+}
+
+pub fn get_frequency(size:u32) -> Vec<i32> {
+    let result: Vec<i32> = Vec::new();
+    result
 }
 
 
@@ -135,8 +143,8 @@ mod tests {
 
     #[test]
     fn test_hamming_distance() {
-        let left = "this is a test";
-        let right = "wokka wokka!!!";
+        let left = "this is a test".as_bytes();
+        let right = "wokka wokka!!!".as_bytes();
         let result = hamming_distance(left, right);
         assert_eq!(result, 37);
     }
