@@ -82,6 +82,23 @@ pub fn repeating_key_xor(key:&str, message:&str) -> String {
     return result;
 }
 
+pub fn hamming_distance(left:&str, right:&str) -> u32 {
+    let left_bytes = left.as_bytes();
+    let right_bytes = right.as_bytes();
+    let mut distance:u32 = 0;
+    for (i, data) in left_bytes.iter().enumerate() {
+        let mut result:u8 = data^right_bytes[i];
+        while result > 0 {
+            let d = result&1;
+            if d == 1  {
+                distance += 1;
+            }
+            result = result >> 1;
+        }
+    }
+    return distance;
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -114,5 +131,13 @@ mod tests {
         let message1 = "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal";
         let result = repeating_key_xor(key, message1);
         assert_eq!(result, "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f");
+    }
+
+    #[test]
+    fn test_hamming_distance() {
+        let left = "this is a test";
+        let right = "wokka wokka!!!";
+        let result = hamming_distance(left, right);
+        assert_eq!(result, 37);
     }
 }

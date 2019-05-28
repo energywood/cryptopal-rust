@@ -1,0 +1,9 @@
+[package]
+name = "set1c6"
+version = "0.1.0"
+authors = ["gzhong"]
+edition = "2018"
+
+[dependencies]
+base64 = "0.10.1"
+set1lib = { path = "../set1lib" }
