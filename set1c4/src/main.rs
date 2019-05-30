@@ -20,7 +20,8 @@ fn main() {
     let mut max = 0;
     let mut result = String::new();
     for (i, line) in lines.enumerate() {
-        let (score, text) = set1lib::crack_xor(line);
+        let bin = hex::decode(line).expect("invalid hex");
+        let (_, text, score) = set1lib::crack_xor(&bin);
         // println!("line:{} {}", i, text);
         if score > max {
             max = score;

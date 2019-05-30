@@ -26,12 +26,10 @@ fn fixed_xor(hex_left: &str, hex_right: &str) -> String {
 }
 
 #[allow(dead_code)]
-fn xor_decode(hex_left: &str, key: u8) -> Option<String> {
-    let left_bin = hex::decode(hex_left).unwrap();
+fn xor_decode(bin: &[u8], key: u8) -> Option<String> {
     let mut result: Vec<u8> = Vec::new();
-    // let key_u8 = key as u8;
-    for num in 0..left_bin.len() {
-        result.push(left_bin[num]^key);
+    for num in 0..bin.len() {
+        result.push(bin[num]^key);
     }
     let plaintext_opt = std::str::from_utf8(&result).ok();
     match plaintext_opt {
@@ -48,28 +46,34 @@ fn get_score(message: &str) -> i32 {
         total = total * word.len();
     }
     let score:i32 = (total) as i32;
-    score
+    -score
 }
 
 fn get_score_v2(message:&str) -> i32 {
     let mut frequency = get_frequency(message.len());
+    let mut non_letter = 0;
     for &data in message.to_ascii_lowercase().as_bytes() {
         let idx = (data as i32) - ('a' as i32);
-        if idx >= 0 && idx <= 26 {
+        if idx >= 0 && idx < 26 {
             let idx = idx as usize;
             frequency[idx] = frequency[idx] - 1;
+        } else if data != (' ' as u8) {
+            non_letter += 1;
         }
     }
 
-    // frequency.iter().map()
-    0
+    let variance:Vec<_> = frequency.iter().map(|x| x*x).collect();
+    let mut result = variance.iter().sum();
+    result += non_letter*non_letter;
+    result
 }
 
 
-pub fn crack_xor(message: &str) -> (i32, String) {
+pub fn crack_xor(message: &[u8]) -> (char, String, i32) {
     let start = '0' as u8;
     let end = 'z' as u8;
-    let mut max = 0;
+    let mut k = ' ';
+    let mut min = std::i32::MAX;
     let mut result = String::new();
     for key in start..end {
         let curr = xor_decode(message, key);
@@ -77,28 +81,39 @@ pub fn crack_xor(message: &str) -> (i32, String) {
             continue;
         }
         let curr_msg = curr.unwrap();
-        let s = get_score(&curr_msg);
-        if s > max {
-            max = s;
+        let s = get_score_v2(&curr_msg);
+        if s < min {
+            min = s;
+            k = key as char;
             result = curr_msg;
             // println!("debug {} {}", max, result);
         }
     }
-    (max, result)
+    (k, result, min)
 }
 
+pub fn repeating_key_xor_str(key:&[u8], message:&[u8]) -> String {
+    let plaintext_bytes = repeating_key_xor(key, message);
+    let plaintext = String::from_utf8(plaintext_bytes).expect("invalid utf8");
+    plaintext
+}
 
-pub fn repeating_key_xor(key:&str, message:&str) -> String {
+pub fn repeating_key_xor_hex(key:&str, message:&str) -> String {
     let key_bytes = key.as_bytes();
-    let key_len = key_bytes.len();
     let message_bytes = message.as_bytes();
+    let plaintext_bytes = repeating_key_xor(key_bytes, message_bytes);
+    let result = hex::encode(plaintext_bytes);
+    result
+}
+
+fn repeating_key_xor(key_bytes:&[u8], message_bytes:&[u8]) -> Vec<u8> {
+    let key_len = key_bytes.len();
     let mut plaintext_bytes:Vec<u8> = Vec::new();
     for (i, data) in message_bytes.iter().enumerate() {
         let k = i % key_len;
         plaintext_bytes.push(data^key_bytes[k]);
     }
-    let result = hex::encode(plaintext_bytes);
-    result
+    plaintext_bytes
 }
 
 pub fn hamming_distance(left:&[u8], right:&[u8]) -> u32 {
@@ -143,7 +158,7 @@ mod tests {
     #[test]
     fn test_crack_xor() {
         let message = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
-        let plaintext = crack_xor(message).1;
+        let plaintext = crack_xor(&hex::decode(message).unwrap()).1;
         assert_eq!(plaintext, "Cooking MC's like a pound of bacon");
     }
 
@@ -151,7 +166,7 @@ mod tests {
     fn test_repeating_key_xor() {
         let key = "ICE";
         let message1 = "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal";
-        let result = repeating_key_xor(key, message1);
+        let result = repeating_key_xor_hex(key, message1);
         assert_eq!(result, "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f");
     }
 

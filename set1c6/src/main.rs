@@ -38,14 +38,20 @@ fn main() {
         contents_trim.push_str(line);
     }
     let content_b = base64::decode(&contents_trim).expect("decoding error");
-    let result = key_size_estimate(&content_b[..]);
-    println!("result {:?}", result);
-    
+    let key_size_list = key_size_estimate(&content_b[..]);
+    let key_size = key_size_list.peek().unwrap().key_size;
+    println!("result {:?}", key_size_list);
+    let key = find_key(&content_b, key_size);
+    println!("key {:?}", key);
+    let key_u8:Vec<_> = key.iter().map(|x| *x as u8).collect();
+    let plaintext = set1lib::repeating_key_xor_str(&key_u8, &content_b);
+    println!("plaintext {:?}", plaintext );
 }
+
 
 fn key_size_estimate(contents:&[u8]) -> BinaryHeap<KeySizeEstimate> {
     let mut result = BinaryHeap::new();
-    for key_size in 2..40 {
+    for key_size in 2..41 {
         let first = &contents[0..key_size];
         let second = &contents[key_size..2*key_size];
         let hamming_distance = set1lib::hamming_distance(first, second);
@@ -54,4 +60,18 @@ fn key_size_estimate(contents:&[u8]) -> BinaryHeap<KeySizeEstimate> {
     }
 
     result
+}
+
+fn find_key(contents:&[u8], key_size:usize) -> Vec<char>  {
+    let mut key:Vec<char> = Vec::new();
+    for i in 0..key_size {
+        let transpose:Vec<_> = contents.iter().enumerate()
+                    .filter(|&(j, _)| j % key_size == i )
+                    .map(|(_, e)| *e)
+                    .collect();
+        
+        let (k, _, _) = set1lib::crack_xor(&transpose);
+        key.push(k);
+    }
+    key
 }
