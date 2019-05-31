@@ -5,5 +5,5 @@ authors = ["gzhong"]
 
 
 [dependencies]
-base64 = "0.10.1"
+data-encoding = "2.1.2"
 set1lib = { path = "../set1lib" }

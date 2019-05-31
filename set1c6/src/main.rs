@@ -1,4 +1,4 @@
-extern crate base64;
+extern crate data_encoding;
 extern crate set1lib;
 use std::collections::BinaryHeap;
 use std::cmp::PartialOrd;
@@ -32,12 +32,11 @@ fn main() {
     println!("In file {}", filename);
 
     let contents = fs::read_to_string(filename).expect("Something went wrong reading the file");
-    let contents = contents.lines();
-    let mut contents_trim = String::new();
-    for line in contents {
-        contents_trim.push_str(line);
-    }
-    let content_b = base64::decode(&contents_trim).expect("decoding error");
+    let mut spec = data_encoding::BASE64.specification();
+    spec.ignore.push_str("\n");
+    let base64 = spec.encoding().unwrap();
+    let content_b = base64.decode(contents.as_bytes()).expect("invalid b64");
+
     let key_size_list = key_size_estimate(&content_b[..]);
     let key_size = key_size_list.peek().unwrap().key_size;
     println!("result {:?}", key_size_list);
