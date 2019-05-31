@@ -1,8 +1,6 @@
 extern crate data_encoding;
 extern crate set1lib;
-use std::cmp::Ord;
 use std::cmp::PartialEq;
-use std::cmp::PartialOrd;
 use std::collections::BinaryHeap;
 use std::env;
 use std::fs;
