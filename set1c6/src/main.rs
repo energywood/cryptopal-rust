@@ -42,19 +42,24 @@ fn main() {
     let key_size = key_size_list.peek().unwrap().key_size;
     println!("result {:?}", key_size_list);
     let key = find_key(&content_b, key_size);
-    println!("key {:?}", key);
-    let key_u8:Vec<_> = key.iter().map(|x| *x as u8).collect();
-    let plaintext = set1lib::repeating_key_xor_str(&key_u8, &content_b);
-    println!("plaintext {:?}", plaintext );
+    println!("key: {}", String::from_utf8(key.clone()).unwrap());
+    let plaintext = set1lib::repeating_key_xor_str(&key, &content_b);
+    println!("{}", plaintext );
 }
 
 
 fn key_size_estimate(contents:&[u8]) -> BinaryHeap<KeySizeEstimate> {
     let mut result = BinaryHeap::new();
     for key_size in 2..41 {
-        let first = &contents[0..key_size];
-        let second = &contents[key_size..2*key_size];
-        let hamming_distance = set1lib::hamming_distance(first, second);
+
+        let k = contents.len()/(key_size*2);
+        let mut hamming_distance = 0;
+        for i in 0..k {
+            let first = &contents[i*key_size..(i+1)*key_size];
+            let second = &contents[(i+1)*key_size..(i+2)*key_size];
+            hamming_distance += set1lib::hamming_distance(first, second);
+        }
+        let hamming_distance = hamming_distance/ (k as u32);
         let ham_dis_norm:i32 = (hamming_distance*100 / key_size as u32) as i32;
         result.push(KeySizeEstimate{min_dis: -ham_dis_norm, key_size:key_size});
     }
@@ -62,8 +67,8 @@ fn key_size_estimate(contents:&[u8]) -> BinaryHeap<KeySizeEstimate> {
     result
 }
 
-fn find_key(contents:&[u8], key_size:usize) -> Vec<char>  {
-    let mut key:Vec<char> = Vec::new();
+fn find_key(contents:&[u8], key_size:usize) -> Vec<u8>  {
+    let mut key:Vec<u8> = Vec::new();
     for i in 0..key_size {
         let transpose:Vec<_> = contents.iter().enumerate()
                     .filter(|&(j, _)| j % key_size == i )
@@ -71,7 +76,7 @@ fn find_key(contents:&[u8], key_size:usize) -> Vec<char>  {
                     .collect();
         
         let (k, _, _) = set1lib::crack_xor(&transpose);
-        key.push(k);
+        key.push(k as u8);
     }
     key
 }

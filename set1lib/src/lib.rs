@@ -4,7 +4,9 @@ extern crate base64;
 const FREQUENCY:[f64;26] = [8.167, 1.492, 2.782, 4.253, 12.702, 2.228, 2.015, 
                             6.094, 6.966, 0.153, 0.772, 4.025, 2.406, 6.749,
                             7.507, 1.929, 0.095, 5.987, 6.327, 9.056,
-                            2.758, 0.978, 2.360, 0.150, 1.974, 0.074]; 
+                            2.758, 0.978, 2.360, 0.150, 1.974, 0.074];
+
+const AVG_WORD_SIZE:usize = 5; 
 
 #[allow(dead_code)]
 fn hex_to_base64(hexstring : &str) -> String {
@@ -52,12 +54,15 @@ fn get_score(message: &str) -> i32 {
 fn get_score_v2(message:&str) -> i32 {
     let mut frequency = get_frequency(message.len());
     let mut non_letter = 0;
+    let mut space:i32 = 0;
     for &data in message.to_ascii_lowercase().as_bytes() {
         let idx = (data as i32) - ('a' as i32);
         if idx >= 0 && idx < 26 {
             let idx = idx as usize;
             frequency[idx] = frequency[idx] - 1;
-        } else if data != (' ' as u8) {
+        } else if data == (' ' as u8) {
+            space += 1;
+        } else {
             non_letter += 1;
         }
     }
@@ -65,13 +70,15 @@ fn get_score_v2(message:&str) -> i32 {
     let variance:Vec<_> = frequency.iter().map(|x| x*x).collect();
     let mut result = variance.iter().sum();
     result += non_letter*non_letter;
+    space = (message.len()/AVG_WORD_SIZE) as i32 - space;
+    result += (space*space) as i32;
     result
 }
 
 
 pub fn crack_xor(message: &[u8]) -> (char, String, i32) {
-    let start = '0' as u8;
-    let end = 'z' as u8;
+    let start = ' ' as u8;
+    let end = '~' as u8;
     let mut k = ' ';
     let mut min = std::i32::MAX;
     let mut result = String::new();
