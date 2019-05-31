@@ -5,5 +5,6 @@
 members = [
     "set1lib",
     "set1c4",
-    "set1c6"
+    "set1c6",
+    "set1c7"
 ]
