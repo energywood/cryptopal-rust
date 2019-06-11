@@ -1,0 +1,10 @@
+[package]
+name = "set1c8"
+version = "0.1.0"
+authors = ["gzhong <gzhong.git@outlook.com>"]
+edition = "2018"
+
+[dependencies]
+data-encoding = "2.1.2"
+set1lib = { path = "../set1lib" }
+rust-crypto = "0.2.36"
