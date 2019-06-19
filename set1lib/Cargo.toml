@@ -6,3 +6,4 @@ authors = ["gzhong <gzhong.git@outlook.com>"]
 [dependencies]
 hex="0.3.2"
 base64 = "0.10.1"
+rust-crypto = "0.2.36"

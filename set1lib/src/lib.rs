@@ -1,5 +1,9 @@
 extern crate base64;
 extern crate hex;
+extern crate crypto;
+
+use crypto::{ symmetriccipher, buffer, aes, blockmodes };
+use crypto::buffer::{ ReadBuffer, WriteBuffer, BufferResult };
 
 const FREQUENCY: [f64; 26] = [
     8.167, 1.492, 2.782, 4.253, 12.702, 2.228, 2.015, 6.094, 6.966, 0.153, 0.772, 4.025, 2.406,
@@ -157,6 +161,29 @@ pub fn pkcs7padding(data: &[u8], block: usize) -> Vec<u8> {
         result.push(pad as u8);
     }
     result
+}
+
+pub fn decrypt(encrypted_data: &[u8], key: &[u8]) -> Result<Vec<u8>, symmetriccipher::SymmetricCipherError> {
+    let mut decryptor = aes::ecb_decryptor(
+            aes::KeySize::KeySize128,
+            key,
+            blockmodes::NoPadding);
+
+    let mut final_result = Vec::<u8>::new();
+    let mut read_buffer = buffer::RefReadBuffer::new(encrypted_data);
+    let mut buffer = [0; 4096];
+    let mut write_buffer = buffer::RefWriteBuffer::new(&mut buffer);
+
+    loop {
+        let result = decryptor.decrypt(&mut read_buffer, &mut write_buffer, true)?;
+        final_result.extend(write_buffer.take_read_buffer().take_remaining().iter().map(|&i| i));
+        match result {
+            BufferResult::BufferUnderflow => break,
+            BufferResult::BufferOverflow => { }
+        }
+    }
+
+    Ok(final_result)
 }
 
 #[cfg(test)]
