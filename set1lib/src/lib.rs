@@ -145,6 +145,20 @@ pub fn get_frequency(size: usize) -> Vec<i32> {
     frequency
 }
 
+pub fn pkcs7padding(data: &[u8], block: usize) -> Vec<u8> {
+    let size = data.len();
+    let even = block*2;
+    let pad = (even - size%even)%even;
+    let mut result = Vec::with_capacity(size + pad);
+    for b in data {
+        result.push(*b);
+    }
+    for _ in 0..pad {
+        result.push(pad as u8);
+    }
+    result
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -188,5 +202,13 @@ mod tests {
         let right = "wokka wokka!!!".as_bytes();
         let result = hamming_distance(left, right);
         assert_eq!(result, 37);
+    }
+
+    #[test]
+    fn test_pkcs_padding() {
+        let message = b"YELLOW SUBMARINE";
+        let exp = b"YELLOW SUBMARINE\x04\x04\x04\x04";
+        let result = pkcs7padding(message, 10);
+        assert_eq!(result, exp);
     }
 }
